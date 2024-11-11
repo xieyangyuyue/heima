@@ -17,24 +17,43 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private CategoryMapper categoryMapper;
 
-    @Override
-    public void add(Category category) {
-        //补充属性值
-        category.setCreateTime(LocalDateTime.now());
-        category.setUpdateTime(LocalDateTime.now());
+@Override
+public void add(Category category) {
+    // 补充属性值
+    category.setCreateTime(LocalDateTime.now());
+    category.setUpdateTime(LocalDateTime.now());
 
-        Map<String,Object> map = ThreadLocalUtil.get();
-        Integer userId = (Integer) map.get("id");
-        category.setCreateUser(userId);
-        categoryMapper.add(category);
+    Map<String,Object> map = ThreadLocalUtil.get();
+    if (map == null) {
+        throw new IllegalStateException("用户信息未初始化");
     }
 
-    @Override
-    public List<Category> list() {
-        Map<String,Object> map = ThreadLocalUtil.get();
-        Integer userId = (Integer) map.get("id");
-        return categoryMapper.list(userId);
+    Integer userId = (Integer) map.get("id");
+    if (userId == null) {
+        throw new IllegalStateException("用户ID未找到");
     }
+
+    category.setCreateUser(userId);
+    categoryMapper.add(category);
+}
+
+@Override
+public List<Category> list() {
+    Map<String,Object> map = ThreadLocalUtil.get();
+    if (map == null) {
+        throw new IllegalStateException("用户信息未初始化");
+    }
+
+    Integer userId = (Integer) map.get("id");
+    if (userId == null) {
+        throw new IllegalStateException("用户ID未找到");
+    }
+
+    return categoryMapper.list(userId);
+    // System.out.println("ThreadLocal map: " + map);
+
+}
+
 
     @Override
     public Category findById(Integer id) {

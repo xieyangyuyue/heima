@@ -45,52 +45,30 @@ public class UserController {
         }
     }
 
-    // @PostMapping("/login")
-    // public Result<String> login(@Pattern(regexp = "^\\S{5,16}$") String username, @Pattern(regexp = "^\\S{5,16}$") String password) {
-    //     //根据用户名查询用户
-    //     User loginUser = userService.findByUserName(username);
-    //     //判断该用户是否存在
-    //     if (loginUser == null) {
-    //         return Result.error("用户名错误");
-    //     }
-    //
-    //     //判断密码是否正确  loginUser对象中的password是密文
-    //     if (Md5Util.getMD5String(password).equals(loginUser.getPassword())) {
-    //         //登录成功
-    //         Map<String, Object> claims = new HashMap<>();
-    //         claims.put("id", loginUser.getId());
-    //         claims.put("username", loginUser.getUsername());
-    //         String token = JwtUtil.genToken(claims);
-    //         //把token存储到redis中
-    //         ValueOperations<String, String> operations = stringRedisTemplate.opsForValue();
-    //         operations.set(token,token,1, TimeUnit.HOURS);
-    //         return Result.success(token);
-    //     }
-    //     return Result.error("密码错误");
-    // }
-
-    //登录
     @PostMapping("/login")
-    public Result<String> login(@Pattern(regexp = "^\\S{5,16}$") String username,
-                                @Pattern(regexp = "^\\S{5,16}$") String password) {
+    public Result<String> login(@Pattern(regexp = "^\\S{5,16}$") String username, @Pattern(regexp = "^\\S{5,16}$") String password) {
         //根据用户名查询用户
         User loginUser = userService.findByUserName(username);
-        //判断用户是否存在
-        if (loginUser == null) return Result.error("用户名错误");
-        //判断密码是否正确，loginUser的password是密文
+        //判断该用户是否存在
+        if (loginUser == null) {
+            return Result.error("用户名错误");
+        }
+
+        //判断密码是否正确  loginUser对象中的password是密文
         if (Md5Util.getMD5String(password).equals(loginUser.getPassword())) {
-            //登陆成功
-            //对登陆数据添加到claims，生成jwt令牌,
-            //将登陆的id，username封装添加到载荷，生成 token
+            //登录成功
             Map<String, Object> claims = new HashMap<>();
             claims.put("id", loginUser.getId());
             claims.put("username", loginUser.getUsername());
             String token = JwtUtil.genToken(claims);
+            // //把token存储到redis中
+            // ValueOperations<String, String> operations = stringRedisTemplate.opsForValue();
+            // operations.set(token,token,1, TimeUnit.HOURS);
             return Result.success(token);
         }
-        //密码错误
         return Result.error("密码错误");
     }
+
 
     @GetMapping("/userInfo")
     public Result<User> userInfo(/*@RequestHeader(name = "Authorization") String token*/) {
